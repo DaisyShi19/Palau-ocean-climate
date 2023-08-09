@@ -16,7 +16,19 @@ library(stringr)
 library(nmfspalette)
 library(rerddap)
 ```
-
+```{r}
+### Load libraries for mapping
+library(raster)
+library(rasterVis)
+library(mapdata)
+library(maptools)
+library(cmocean)
+library(latticeExtra)
+library(grid)
+library(rerddap)
+library(terra)
+library(viridis)
+```
 ```{r}
 #| include: false
 # Set report year (RptYr), to make things easier
@@ -123,4 +135,41 @@ axis((4), at = seq(0.8, 1.3, 0.1), tck = 0.025, labels = FALSE)
 # _axt = "n" removes tick labels so that they can be customized later 
 # _axs = "i" removes whitespace beyond axes maxima
 ```
-  
+
+```{r}
+#| echo: false
+### Mapping conditions for the report year
+FirstYr= paste(RptYr, '-01-01T00:00:00Z', sep = "")
+datasetid = 'md50_exp-2022-clim'
+
+# Thanks to Johanna Wren, below section for making the raster map is based on her script
+
+# Download data from erddap and save it to .nc file
+# Comment below out if you have already downloaded and saved the .nc file
+
+Dat <- griddap(url = ERDDAP_Node, datasetid ,  
+                  latitude = lat_range, longitude = lon_range,
+                    fields = 'MD50',
+                    store=disk('md50data'))
+
+# Read in the files
+files <- list.files('md50data/', full.names = T)
+# Read the file into R and combine as stack and sort them after the date (name)
+md50_clim <- brick(files)
+
+# Get land information and make it into a spatial object
+land <- maps::map('world', fill=TRUE, xlim=lon_range, ylim=lat_range, plot=FALSE)
+ids <- sapply(strsplit(land$names, ":"), function(x) x[1])
+bPols <- map2SpatialPolygons(land, IDs=ids, proj4string=CRS('+proj=longlat +datum=WGS84 +no_defs'))
+
+# make map themes
+mapTheme <- viridisTheme(region=turbo(10))
+
+# Make plot
+levelplot(md50_clim, pretty=T, margin=F, par.setting=mapTheme,  
+          at=seq(0,2,by=0.02),
+          colorkey=list( height = .5, width = 1))
+# add unit to colorbar
+grid.text('μm' , y=unit(0.6, "npc"), 
+                x=unit(0.81, "npc"))   
+```  

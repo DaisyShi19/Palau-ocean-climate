@@ -138,17 +138,16 @@ datasetid = 'esa-cci-chla-2022-clim_v6-0'
 # Download data from erddap and save it to .nc file
 # Comment below out if you have already downloaded and saved the .nc file
 
-chlDat <- griddap(url = ERDDAP_Node, datasetid ,  
+Dat <- griddap(url = ERDDAP_Node, datasetid ,  
                   time = c(FirstYr, FirstYr), 
                   latitude = lat_range, longitude = lon_range,
-                    fields = chlInfo$variables$variable_name[1],
-                    stride = c(1,1,1),
+                    fields = 'chlor_a',
                     store=disk('Chldata'))
 
 # Read in the files
-Chlfiles <- list.files('Chldata/', full.names = T)
-# Read the file into R and combine as stack and sort them after the date (name)
-chl_clim <- brick(Chlfiles)
+files <- list.files('Chldata/', full.names = T)
+# Read the file into R and combine as stack and sort them after the variable
+chl_clim <- brick(files)
 
 # Get land information and make it into a spatial object
 land <- maps::map('world', fill=TRUE, xlim=lon_range, ylim=lat_range, plot=FALSE)
@@ -156,9 +155,19 @@ ids <- sapply(strsplit(land$names, ":"), function(x) x[1])
 bPols <- map2SpatialPolygons(land, IDs=ids, proj4string=CRS('+proj=longlat +datum=WGS84 +no_defs'))
 
 # make map themes
-mapThemeChl <- rasterTheme(region=cmocean('algae')(50))
+mapTheme <- rasterTheme(region=cmocean('algae')(50))
 
 # Make plot
-levelplot(chl_clim, pretty=T, margin=F, par.setting=mapThemeChl, zscaleLog=T)
-
+#log scale
+levelplot(chl_clim, pretty=T, margin=F, par.setting=mapTheme, zscaleLog=T)
+#regular scale
+levelplot(log(chl_clim), pretty=T, margin=F, par.setting=mapTheme, 
+          at=seq(-4,1,by=0.5),
+          colorkey=list( height = .5, width = 1,
+                 labels=list(at=c(-4,-3, -2, -1, 0, 1, 2), 
+                             labels=c("0.0001", "0.001", "0.01", "0.1", "1", "10", "100"))) )
+# add unit to colorbar
+grid.text(expression(mg/m^3) , y=unit(0.6, "npc"), 
+                x=unit(0.82, "npc"))    
+       
 ```
