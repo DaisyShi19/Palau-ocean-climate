@@ -128,27 +128,37 @@ axis((4), at = seq(0.05, 0.18, 0.01), tck = 0.025, labels = FALSE)
 ```
 
 ```{r}
-#| echo: false
-### Mapping conditions for the report year
+#| include: false
+### Accessing conditions for the report year
 FirstYr= paste(RptYr, '-01-01T00:00:00Z', sep = "")
 datasetid = 'esa-cci-chla-2022-clim_v6-0'
 
 # Thanks to Johanna Wren, below section for making the raster map is based on her script
 
-# Download data from erddap and save it to .nc file
-# Comment below out if you have already downloaded and saved the .nc file
-
 Dat <- griddap(url = ERDDAP_Node, datasetid ,  
                   time = c(FirstYr, FirstYr), 
                   latitude = lat_range, longitude = lon_range,
-                    fields = 'chlor_a',
-                    store=disk('Chldata'))
+                    fields = 'chlor_a')
 
-# Read in the files
-files <- list.files('Chldata/', full.names = T)
-# Read the file into R and combine as stack and sort them after the variable
-chl_clim <- brick(files)
+temp <- Dat$data
 
+```
+
+```{r}
+#| include: false
+### Create a rasterbrick for mapping
+#remove the time column
+df <- temp[,-3]
+#create a rasterlayer with 3-d dataframe
+rst <- rasterFromXYZ(df)
+#create a rasterbrick with the rasterlayer
+chl_clim <- brick(rst)
+```
+
+
+```{r}
+#| echo: false
+### Mapping conditions for the report year
 # Get land information and make it into a spatial object
 land <- maps::map('world', fill=TRUE, xlim=lon_range, ylim=lat_range, plot=FALSE)
 ids <- sapply(strsplit(land$names, ":"), function(x) x[1])
