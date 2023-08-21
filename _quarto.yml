@@ -1,0 +1,20 @@
+project:
+  type: book
+
+book:
+  title: "Palau Indicators"
+  author: "Phoebe.Woodworth-Jefcoats@noaa.gov & Hui.Shi@noaa.gov"
+  date: last-modified
+  
+  chapters:
+    - index.qmd
+    - 01-Chlorophyll-Concentration.qmd
+    - 02-Estimated-Phytoplankton-Size.qmd
+    
+# bibliography: references.bib
+
+format:
+  html:
+    theme: cosmo
+  docx:
+    reference-doc: Palau-Reference-Doc.docx
