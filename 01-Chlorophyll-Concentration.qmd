@@ -16,7 +16,9 @@ library(stringr)
 library(nmfspalette)
 library(rerddap)
 ```
+
 ```{r}
+#| include: false
 ### Load libraries for mapping
 library(raster)
 library(rasterVis)

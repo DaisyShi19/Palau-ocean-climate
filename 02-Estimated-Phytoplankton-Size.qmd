@@ -16,7 +16,9 @@ library(stringr)
 library(nmfspalette)
 library(rerddap)
 ```
+
 ```{r}
+#| include: false
 ### Load libraries for mapping
 library(raster)
 library(rasterVis)
@@ -57,7 +59,7 @@ ERDDAP_Node <- "https://oceanwatch.pifsc.noaa.gov/erddap/"
 
 # Access the data and all its attributes (this takes a bit)
 md50_all <- griddap(url = ERDDAP_Node, 'md50_exp', 
-               time = c('1998-01-01', paste(RptYr, '-12-01', sep = "")),
+               time = c('1998-01-01T00:00:00Z', paste(RptYr, '-12-01T00:00:00Z', sep = "")),
                latitude = lat_range, longitude = lon_range,
                fields = "MD50")
 # Get just the chlorophyll data and its spatiotemporal coordinates
