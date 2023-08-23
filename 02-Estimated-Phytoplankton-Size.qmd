@@ -30,6 +30,7 @@ library(grid)
 library(rerddap)
 library(terra)
 library(viridis)
+library(sf)
 ```
 ```{r}
 #| include: false
@@ -165,7 +166,9 @@ ids <- sapply(strsplit(land$names, ":"), function(x) x[1])
 bPols <- map2SpatialPolygons(land, IDs=ids, proj4string=CRS('+proj=longlat +datum=WGS84 +no_defs'))
 
 # make map themes
-mapTheme <- viridisTheme(region=turbo(10))
+#mapTheme <- viridisTheme(region=turbo(3))
+mapTheme <- rasterTheme(region=cmocean("delta")(5))
+
 
 # Make plot
 levelplot(md50_clim, pretty=T, margin=F, par.setting=mapTheme,  
