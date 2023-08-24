@@ -131,7 +131,7 @@ axis((4), at = seq(0.05, 0.18, 0.01), tck = 0.025, labels = FALSE)
 
 ```{r}
 #| include: false
-### Accessing conditions for the report year
+### Accessing data for long-term climatology
 FirstYr= '1998-01-01T00:00:00Z'
 datasetid = 'esa-cci-chla-1998-2021-clim-v6-0'
 
@@ -160,7 +160,7 @@ chl_clim <- brick(rst)
 
 ```{r}
 #| echo: false
-### Mapping conditions for the report year
+### Mapping long-term climatology
 # Get land information and make it into a spatial object
 land <- maps::map('world', fill=TRUE, xlim=lon_range, ylim=lat_range, plot=FALSE)
 ids <- sapply(strsplit(land$names, ":"), function(x) x[1])
