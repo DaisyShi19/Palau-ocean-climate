@@ -142,8 +142,8 @@ axis((4), at = seq(0.8, 1.3, 0.1), tck = 0.025, labels = FALSE)
 ```{r}
 #| echo: false
 ### Mapping conditions for the report year
-FirstYr= paste(RptYr, '-01-01T00:00:00Z', sep = "")
-datasetid = 'md50_exp-2022-clim'
+FirstYr= '1998-01-01T00:00:00Z'
+datasetid = 'md50_exp-1998-2021-clim'
 
 # Thanks to Johanna Wren, below section for making the raster map is based on her script
 
@@ -172,9 +172,9 @@ mapTheme <- rasterTheme(region=cmocean("delta")(5))
 
 # Make plot
 levelplot(md50_clim, pretty=T, margin=F, par.setting=mapTheme,  
-          at=seq(0,2,by=0.02),
+          at=seq(0.5,1.5,by=0.01),
           colorkey=list( height = .5, width = 1))
 # add unit to colorbar
 grid.text('μm' , y=unit(0.6, "npc"), 
-                x=unit(0.81, "npc"))   
+                x=unit(0.81, "npc"))  
 ```  

@@ -132,8 +132,8 @@ axis((4), at = seq(0.05, 0.18, 0.01), tck = 0.025, labels = FALSE)
 ```{r}
 #| include: false
 ### Accessing conditions for the report year
-FirstYr= paste(RptYr, '-01-01T00:00:00Z', sep = "")
-datasetid = 'esa-cci-chla-2022-clim_v6-0'
+FirstYr= '1998-01-01T00:00:00Z'
+datasetid = 'esa-cci-chla-1998-2021-clim-v6-0'
 
 # Thanks to Johanna Wren, below section for making the raster map is based on her script
 
@@ -170,16 +170,13 @@ bPols <- map2SpatialPolygons(land, IDs=ids, proj4string=CRS('+proj=longlat +datu
 mapTheme <- rasterTheme(region=cmocean('algae')(50))
 
 # Make plot
-#log scale
-levelplot(chl_clim, pretty=T, margin=F, par.setting=mapTheme, zscaleLog=T)
 #regular scale
 levelplot(log(chl_clim), pretty=T, margin=F, par.setting=mapTheme, 
-          at=seq(-4,1,by=0.5),
+          at=seq(-3,1,by=0.4),
           colorkey=list( height = .5, width = 1,
                  labels=list(at=c(-4,-3, -2, -1, 0, 1, 2), 
-                             labels=c("0.0001", "0.001", "0.01", "0.1", "1", "10", "100"))) )
+                             labels=c("0.0001", "0.001", "0.01", "0.1", "1", "10", "100")) ) )
 # add unit to colorbar
 grid.text(expression(mg/m^3) , y=unit(0.6, "npc"), 
                 x=unit(0.82, "npc"))    
-       
 ```
