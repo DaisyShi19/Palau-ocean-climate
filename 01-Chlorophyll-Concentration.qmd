@@ -178,5 +178,5 @@ levelplot(log(chl_clim), pretty=T, margin=F, par.setting=mapTheme,
                              labels=c("0.0001", "0.001", "0.01", "0.1", "1", "10", "100")) ) )
 # add unit to colorbar
 grid.text(expression(mg/m^3) , y=unit(0.6, "npc"), 
-                x=unit(0.82, "npc"))    
+                x=unit(0.9, "npc"))    
 ```

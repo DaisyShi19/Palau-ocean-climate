@@ -176,5 +176,5 @@ levelplot(md50_clim, pretty=T, margin=F, par.setting=mapTheme,
           colorkey=list( height = .5, width = 1))
 # add unit to colorbar
 grid.text('μm' , y=unit(0.6, "npc"), 
-                x=unit(0.81, "npc"))  
+                x=unit(0.9, "npc"))  
 ```  
