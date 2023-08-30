@@ -1,33 +1,29 @@
----
-title: "Chlorophyll Concentration"
-author: "phoebe.woodworth-jefcoats@noaa.gov"
-date: '2023-08-24'
-output:
-  github_document: default
-  html_notebook: default
-keep_md: true
----
+Chlorophyll Concentration
+================
+<phoebe.woodworth-jefcoats@noaa.gov>
+2023-08-24
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
-## __Indicator: Chlorophyll Concentration__
-Phytoplankton are the foundation of the marine food web.  Their abundance affects food 
-availability for all consumers, ranging from zooplankton to apex predators. Chlorophyll 
-concentration is used as a proxy for phytoplankton abundance.  Some climate change 
-projections suggest a shift towards lower phytoplankton abundances, particularly in the 
-ocean’s oligotrophic gyres.  Chlorophyll concentration (and phytoplankton abundance) 
-varies greatly across the Pacific basin, with higher concentrations generally found at 
-higher latitudes and particularly around coastlines.  Chlorophyll concentrations also 
-vary in response to natural climate variability.   
+## **Indicator: Chlorophyll Concentration**
 
-Chlorophyll-a concentration is estimated from satellite remotely sensed observations 
-of ocean color, which extend back to 1998.  The basin-wide average (1998 – `r RptYr - 1`) 
-is shown below.  The Palau EEZ is also highlighted as a spatial average (1998 – `r RptYr - 1`)
-and a time series averaged over this area.  No significant trend in chlorophyll concentration
-was detected over this region and time span.
+Phytoplankton are the foundation of the marine food web. Their abundance
+affects food availability for all consumers, ranging from zooplankton to
+apex predators. Chlorophyll concentration is used as a proxy for
+phytoplankton abundance. Some climate change projections suggest a shift
+towards lower phytoplankton abundances, particularly in the ocean’s
+oligotrophic gyres. Chlorophyll concentration (and phytoplankton
+abundance) varies greatly across the Pacific basin, with higher
+concentrations generally found at higher latitudes and particularly
+around coastlines. Chlorophyll concentrations also vary in response to
+natural climate variability.
 
-```{r}
+Chlorophyll-a concentration is estimated from satellite remotely sensed
+observations of ocean color, which extend back to 1998. The basin-wide
+average (1998 – 2021) is shown below. The Palau EEZ is also highlighted
+as a spatial average (1998 – 2021) and a time series averaged over this
+area. No significant trend in chlorophyll concentration was detected
+over this region and time span.
+
+``` r
 ### Load libraries
 library(tidyverse)
 library(lubridate)
@@ -37,7 +33,7 @@ library(nmfspalette)
 library(rerddap)
 ```
 
-```{r}
+``` r
 ### Load libraries for mapping
 library(raster)
 library(rasterVis)
@@ -51,7 +47,7 @@ library(terra)
 library(viridis)
 ```
 
-```{r}
+``` r
 # Set report year (RptYr), to make things easier
 RptYr <- 2022
 
@@ -60,7 +56,7 @@ RptYr <- 2022
 Dir <- here("Chlorophyll_Concentration")
 ```
 
-```{r}
+``` r
 ### Load data
 # Thanks to Melanie Abecassis and the OceanWatch training she led, whose code I'm borrowing here
 
@@ -84,14 +80,14 @@ chl_all <- griddap(url = ERDDAP_Node, 'esa-cci-chla-monthly-v6-0',
 chl <- chl_all$data
 ```
 
-```{r}
+``` r
 # Monthly spatial average
 chl_ts <- chl |>
   group_by(time) |>
   summarise(chlor_a = mean(chlor_a, na.rm = TRUE))
 ```
 
-```{r}
+``` r
 ### Linear fit
 n_obs <- seq(1, length(chl_ts$chlor_a), 1)
 chl_lm <- lm(chl_ts$chlor_a ~ n_obs)
@@ -103,8 +99,7 @@ chl_lm <- lm(chl_ts$chlor_a ~ n_obs)
 # This is something that can be added in in the future.
 ```
 
-
-```{r}
+``` r
 ### Plot the time series
 # Create axes limits to make things simpler
 # These were determined through looking at quick rough plots and data limits
@@ -122,11 +117,16 @@ axis((1), at = ymd_hms(chl_ts$time[seq(1, length(n_obs), 12)]), tck = 0.025, lab
 axis((2), at = seq(0.05, 0.18, 0.01), tck = 0.025, las = 1)
 axis((3), at = ymd_hms(chl_ts$time[seq(1, length(n_obs), 12)]), tck = 0.025, labels = FALSE)
 axis((4), at = seq(0.05, 0.18, 0.01), tck = 0.025, labels = FALSE)
+```
+
+![](01-Chlorophyll-Concentration_files/figure-gfm/unnamed-chunk-7-1.png)<!-- -->
+
+``` r
 # _axt = "n" removes tick labels so that they can be customized later 
 # _axs = "i" removes whitespace beyond axes maxima
 ```
 
-```{r}
+``` r
 ### Accessing data for long-term climatology
 FirstYr= '1998-01-01T00:00:00Z'
 datasetid = 'esa-cci-chla-1998-2021-clim-v6-0'
@@ -139,10 +139,9 @@ Dat <- griddap(url = ERDDAP_Node, datasetid ,
                     fields = 'chlor_a')
 
 temp <- Dat$data
-
 ```
 
-```{r}
+``` r
 ### Create a rasterbrick for mapping
 #remove the time column
 df <- temp[,-3]
@@ -152,8 +151,7 @@ rst <- rasterFromXYZ(df)
 chl_clim <- brick(rst)
 ```
 
-
-```{r}
+``` r
 ### Mapping long-term climatology
 # Get land information and make it into a spatial object
 land <- maps::map('world', fill=TRUE, xlim=lon_range, ylim=lat_range, plot=FALSE)
@@ -174,3 +172,5 @@ levelplot(log(chl_clim), pretty=T, margin=F, par.setting=mapTheme,
 grid.text(expression(mg/m^3) , y=unit(0.6, "npc"), 
                 x=unit(0.81, "npc"))    
 ```
+
+![](01-Chlorophyll-Concentration_files/figure-gfm/unnamed-chunk-10-1.png)<!-- -->
