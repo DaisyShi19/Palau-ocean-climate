@@ -2,7 +2,10 @@
 title: "Oceanic pH"
 author: "phoebe.woodworth-jefcoats@noaa.gov and hui.shi@noaa.gov"
 date: '2023-08-24'
-output: html_notebook
+output:
+  github_document: default
+  html_notebook: default
+keep_md: true
 ---
 
 
