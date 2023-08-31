@@ -1,17 +1,17 @@
 # Ocean climate indicators for Palau
 This repository includes the code used to create ocean climate
-indicators for the waters around Palau.  Each indicators has its own
-Quarto (.qmd) file which includes the following:
+indicators for the waters around Palau.  Each indicator has its own
+Rmarkdown (.Rmd) file which includes the following:
 
 - Information on accessing the data used for the indicator
-- Information on any data wrangling done outside the Quarto file
+- Information on any data wrangling done outside the Rmarkdown file
 - Code used to wrangle data and calculate indicator properties
 - Code used to generate indicator figures
 
-`Palau-Reference-Doc.docx` serves as the style template for Quarto.
+The Rmarkdown files can be rendered to output HTML pages displaying text descriptions, codes, and figures generated as shown in the markdown (.md) files.
 
 ## Questions?  Comments?  Corrections?
-Please open an issue or email Phoebe.Woodworth-Jefcoats@noaa.gov
+Please open an issue or email Phoebe.Woodworth-Jefcoats@noaa.gov or hui.shi@noaa.gov
 
 ---
 
