@@ -1,11 +1,8 @@
 ---
 title: "Chlorophyll Concentration"
-author: "phoebe.woodworth-jefcoats@noaa.gov"
-date: '2023-08-24'
-output:
-  github_document: default
-  html_notebook: default
-keep_md: true
+author: "phoebe.woodworth-jefcoats@noaa.gov, hui.shi@noaa.gov"
+date: '2024-6-6'
+output: md_document
 ---
 
 ```{r setup, include=FALSE}
@@ -21,11 +18,6 @@ varies greatly across the Pacific basin, with higher concentrations generally fo
 higher latitudes and particularly around coastlines.  Chlorophyll concentrations also 
 vary in response to natural climate variability.   
 
-Chlorophyll-a concentration is estimated from satellite remotely sensed observations 
-of ocean color, which extend back to 1998.  The basin-wide average (1998 – `r RptYr - 1`) 
-is shown below.  The Palau EEZ is also highlighted as a spatial average (1998 – `r RptYr - 1`)
-and a time series averaged over this area.  No significant trend in chlorophyll concentration
-was detected over this region and time span.
 
 ```{r}
 ### Load libraries
@@ -160,6 +152,16 @@ land <- maps::map('world', fill=TRUE, xlim=lon_range, ylim=lat_range, plot=FALSE
 ids <- sapply(strsplit(land$names, ":"), function(x) x[1])
 bPols <- map2SpatialPolygons(land, IDs=ids, proj4string=CRS('+proj=longlat +datum=WGS84 +no_defs'))
 
+# Add EEZ
+llines.SpatVector <- function(x, ...) {
+  xy <- crds(x, list=TRUE)
+  names(xy) <- c("x", "y")
+  lattice::llines(xy, ...)
+}
+f <- "eez/eez.shp"
+v <- vect(f)
+lns <- as.lines(v)
+
 # make map themes
 mapTheme <- rasterTheme(region=cmocean('algae')(50))
 
@@ -169,8 +171,16 @@ levelplot(log(chl_clim), pretty=T, margin=F, par.setting=mapTheme,
           at=seq(-3,1,by=0.4),
           colorkey=list( height = .5, width = 1,
                  labels=list(at=c(-4,-3, -2, -1, 0, 1, 2), 
-                             labels=c("0.0001", "0.001", "0.01", "0.1", "1", "10", "100")) ) )
+                             labels=c("0.0001", "0.001", "0.01", "0.1", "1", "10", "100")) ) )+ layer(sp.polygons(bPols)) + layer(llines(lns))
+
 # add unit to colorbar
 grid.text(expression(mg/m^3) , y=unit(0.6, "npc"), 
                 x=unit(0.81, "npc"))    
 ```
+
+Chlorophyll-a concentration is estimated from satellite remotely sensed observations 
+of ocean color, which extend back to 1998.  The basin-wide average (1998 – `r RptYr - 1`) 
+is shown below.  The Palau EEZ is also highlighted as a spatial average (1998 – `r RptYr - 1`)
+and a time series averaged over this area.  No significant trend in chlorophyll concentration
+was detected over this region and time span.
+
