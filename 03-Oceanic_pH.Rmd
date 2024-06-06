@@ -1,11 +1,8 @@
 ---
 title: "Oceanic pH"
 author: "phoebe.woodworth-jefcoats@noaa.gov and hui.shi@noaa.gov"
-date: '2023-08-24'
-output:
-  github_document: default
-  html_notebook: default
-keep_md: true
+date: '2024-6-6'
+output: md_document
 ---
 
 
@@ -14,8 +11,6 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 ## __Indicator: Oceanic pH__
 Oceanic pH is a measure of how greenhouse gas emissions have already impacted the ocean. This indicator demonstrates that oceanic pH has decreased significantly over the past several decades (i.e., the ocean has become more acidic). Increasing ocean acidification limits the ability of marine organisms to build shells and other calcareous structures. Recent research has shown that pelagic organisms such as pteropods and other prey for commercially valuable fish species are already being negatively impacted by increasing acidification (Feely et al. 2016). The full impact of ocean acidification on the pelagic food web is an area of active research (Fabry et al. 2008).
-
-Oceanic pH is simulated by biogeochemical models using ocean and atmosphere reanalyses as forcings. It spans from 1993 to 2020 and is provided by Copernicus (https://data.marine.copernicus.eu/product/GLOBAL_MULTIYEAR_BGC_001_029/description). A highly significant (p<0.001) decreasing trend is found in the pH of Palau waters from 1993 to  `r RptYr`, and pH declined by `r signif(abs(delta_ph),2)` over this period.
 
 
 ```{r}
@@ -29,6 +24,20 @@ library(ncdf4)
 ```
 
 ```{r}
+### Load libraries for mapping
+library(raster)
+library(rasterVis)
+library(mapdata)
+library(maptools)
+library(cmocean)
+library(latticeExtra)
+library(grid)
+library(rerddap)
+library(terra)
+library(viridis)
+```
+
+```{r}
 # Set report year (RptYr), to make things easier
 RptYr <- 2020
 
@@ -39,8 +48,13 @@ Dir <- here("Oceanic_pH")
 
 ```{r}
 ### Load data
+# Bounding box, from John Marra via email:
+lon_range <- c(129.4088, 137.0541)
+lat_range <- c(1.5214, 11.6587)
+
 #pre-downloaded netCDF file for pH at 5.14 m within the Palau domain (1,5-11.75N,129.5-137W)
-ph_data <- nc_open('ph_palau.nc')
+fn="ph_palau.nc"
+ph_data <- nc_open(fn)
 ph <- ncvar_get(ph_data, "ph")
 time <- ncvar_get(ph_data, "time")
 nc_close(ph_data) 
@@ -100,4 +114,48 @@ axis((4), at = seq(8.01, 8.09, 0.01), tck = 0.025, labels = FALSE)
 ```
 
 
+```{r}
+# Read the file into R and make it to rasterstack
+stack_ph = stack(fn)
+# Convert raster data to dataframe for calculating climatology
+df_temp = as.data.frame(rasterToPoints(stack_ph))
+df_temp$z = rowMeans(df_temp[,3:dim(df_temp)[2]], na.rm = T)
+# Convert dataframe to raster for mapping
+rst = rasterFromXYZ(df_temp[,c("x", "y", "z")])
+#create a rasterbrick with the rasterlayer
+ph_clim <- brick(rst)
+```
+
+```{r}
+### Mapping long-term climatology
+# Get land information and make it into a spatial object
+land <- maps::map('world', fill=TRUE, xlim=lon_range, ylim=lat_range, plot=FALSE)
+ids <- sapply(strsplit(land$names, ":"), function(x) x[1])
+bPols <- map2SpatialPolygons(land, IDs=ids, proj4string=CRS('+proj=longlat +datum=WGS84 +no_defs'))
+
+# Add EEZ
+llines.SpatVector <- function(x, ...) {
+  xy <- crds(x, list=TRUE)
+  names(xy) <- c("x", "y")
+  lattice::llines(xy, ...)
+}
+f <- "eez/eez.shp"
+v <- vect(f)
+lns <- as.lines(v)
+
+# make map themes
+mapTheme <- rasterTheme(region=cmocean('algae')(50))
+
+# Make plot
+#regular scale
+
+levelplot(ph_clim , pretty=T, margin=F,   colorkey=list( height = .5, width = 1) ) + layer(sp.polygons(bPols)) + layer(llines(lns))
+
+# add unit to colorbar
+grid.text(expression(pH) , y=unit(0.6, "npc"), 
+                x=unit(0.81, "npc"))    
+```
+
+
+Oceanic pH is simulated by biogeochemical models using ocean and atmosphere reanalyses as forcings. It spans from 1993 to 2020 and is provided by Copernicus (https://data.marine.copernicus.eu/product/GLOBAL_MULTIYEAR_BGC_001_029/description). A highly significant (p<0.001) decreasing trend is found in the pH of Palau waters from 1993 to  `r RptYr`, and pH declined by `r signif(abs(delta_ph),2)` over this period.
 
