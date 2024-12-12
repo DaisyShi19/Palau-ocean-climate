@@ -233,5 +233,5 @@ atmosphere reanalyses as forcings. It spans from 1993 to 2020 and is
 provided by Copernicus
 (<https://data.marine.copernicus.eu/product/GLOBAL_MULTIYEAR_BGC_001_029/description>).
 A highly significant (p&lt;0.001) decreasing trend is found in the pH of
-Palau waters from 1993 to 2020, and pH declined by 0.037 over this
+Palau waters (5m) from 1993 to 2020, and pH declined by 0.037 over this
 period.

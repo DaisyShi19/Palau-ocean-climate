@@ -157,5 +157,5 @@ grid.text(expression(pH) , y=unit(0.6, "npc"),
 ```
 
 
-Oceanic pH is simulated by biogeochemical models using ocean and atmosphere reanalyses as forcings. It spans from 1993 to 2020 and is provided by Copernicus (https://data.marine.copernicus.eu/product/GLOBAL_MULTIYEAR_BGC_001_029/description). A highly significant (p<0.001) decreasing trend is found in the pH of Palau waters from 1993 to  `r RptYr`, and pH declined by `r signif(abs(delta_ph),2)` over this period.
+Oceanic pH is simulated by biogeochemical models using ocean and atmosphere reanalyses as forcings. It spans from 1993 to 2020 and is provided by Copernicus (https://data.marine.copernicus.eu/product/GLOBAL_MULTIYEAR_BGC_001_029/description). A highly significant (p<0.001) decreasing trend is found in the pH of Palau waters (5m) from 1993 to  `r RptYr`, and pH declined by `r signif(abs(delta_ph),2)` over this period.
 
