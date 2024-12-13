@@ -236,4 +236,8 @@ provided by Copernicus
 (<https://data.marine.copernicus.eu/product/GLOBAL_MULTIYEAR_BGC_001_029/description>).
 A highly significant (p&lt;0.001) increasing trend is found in the DO of
 Palau subsurface waters (~400m) from 1993 to 2022, and DO increased by
+<<<<<<< HEAD
 0.51 ml/l over this period.
+=======
+0.51 over this period.
+>>>>>>> 201aa516f5284cf22886d0f4a340cd971d735a06
