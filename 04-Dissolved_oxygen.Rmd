@@ -158,9 +158,5 @@ grid.text(expression(ml/l) , y=unit(0.6, "npc"),
 ```
 
 
-<<<<<<< HEAD
 Dissolved oxygen (DO) is simulated by biogeochemical models using ocean and atmosphere reanalyses as forcings. It spans from 1993 to 2022 and is provided by Copernicus (https://data.marine.copernicus.eu/product/GLOBAL_MULTIYEAR_BGC_001_029/description). A highly significant (p<0.001) increasing trend is found in the DO of Palau subsurface waters (~400m) from 1993 to  `r RptYr`, and DO increased by `r signif(abs(delta_o2),2)` ml/l over this period.
-=======
-Dissolved oxygen (DO) is simulated by biogeochemical models using ocean and atmosphere reanalyses as forcings. It spans from 1993 to 2022 and is provided by Copernicus (https://data.marine.copernicus.eu/product/GLOBAL_MULTIYEAR_BGC_001_029/description). A highly significant (p<0.001) increasing trend is found in the DO of Palau subsurface waters (~400m) from 1993 to  `r RptYr`, and DO increased by `r signif(abs(delta_o2),2)` over this period.
->>>>>>> 201aa516f5284cf22886d0f4a340cd971d735a06
 
