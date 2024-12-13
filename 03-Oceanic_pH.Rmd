@@ -144,12 +144,12 @@ v <- vect(f)
 lns <- as.lines(v)
 
 # make map themes
-mapTheme <- rasterTheme(region=cmocean('algae')(50))
+mapTheme <- rasterTheme(region=cmocean('matter')(50))
 
 # Make plot
 #regular scale
 
-levelplot(ph_clim , pretty=T, margin=F,   colorkey=list( height = .5, width = 1) ) + layer(sp.polygons(bPols)) + layer(llines(lns))
+levelplot(ph_clim , pretty=T, margin=F,  par.setting=mapTheme, colorkey=list( height = .5, width = 1) ) + layer(sp.polygons(bPols)) + layer(llines(lns))
 
 # add unit to colorbar
 grid.text(expression(pH) , y=unit(0.6, "npc"), 
