@@ -1,0 +1,162 @@
+---
+title: "Dissolved Oxygen"
+author: "hui.shi@noaa.gov"
+date: '2024-12-11'
+output: md_document
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+## __Indicator: Dissolved Oxygen__
+Dissolved oxygen (DO) refers to the concentration of oxygen present in the ocean. Sufficient DO is essential to growth and reproduction of aerobic aquatic life and provides suitable habitat for fish (e.g., Allan 1995, Giller and Malmqvist 1998, Murphy 2006). Climate change and vairability (e.g., the El Niño-Southern Oscillation) leads to changes in DO concentration that can affect the vertical distribution of important species in the Pacific, such as tunas (e.g., Lehodey et al., 2010, Mislan et al., 2017, Leung et al., 2019). This indicator is constructed as DO concentration in the subsurface (~400m) water averaged over the area of focus.
+
+```{r}
+### Load libraries
+library(tidyverse)
+library(lubridate)
+library(here)
+library(stringr)
+library(nmfspalette)
+library(ncdf4) 
+```
+
+```{r}
+### Load libraries for mapping
+library(raster)
+library(rasterVis)
+library(mapdata)
+library(maptools)
+library(cmocean)
+library(latticeExtra)
+library(grid)
+library(rerddap)
+library(terra)
+library(viridis)
+```
+
+```{r}
+# Set report year (RptYr), to make things easier
+RptYr <- 2022
+
+# Set path to variable: Sea_Surface_Temperature
+# This is where the data are and where the plots will go
+Dir <- here("Dissolved_oxygen")
+```
+
+```{r}
+### Load data
+# Bounding box, from John Marra via email:
+lon_range <- c(129.4088, 137.0541)
+lat_range <- c(1.5214, 11.6587)
+
+#pre-downloaded netCDF file for pH at 5.14 m within the Palau domain (1,5-11.75N,129.5-137W)
+fn="dissolved_oxygen_palau.nc"
+o2_data <- nc_open(fn)
+o2 <- ncvar_get(o2_data, "o2")
+# convert unit of o2 from mmol m-3 to ml/l (divided by 44.66)
+o2 <- o2/44.66
+time <- ncvar_get(o2_data, "time")
+nc_close(o2_data) 
+```
+
+
+```{r}
+# Change time from hours to year-month-date format
+time_df <- as.data.frame.table(as.POSIXct(time ,origin='1970-01-02 00:00'))[2]
+colnames(time_df) <- c('time')
+
+# Monthly spatial average
+o2_df=as.data.frame(apply(o2, c(3), mean, na.rm = TRUE))
+colnames(o2_df) <- c('o2')
+
+o2_ts <- data.frame(time_df, o2_df)
+```
+
+```{r}
+### Linear fit
+n_obs <- seq(1, length(o2_ts$o2), 1)
+o2_lm <- lm(o2_ts$o2~ n_obs)
+# summary(o2_lm) shows that there's a significant increasing
+# trend over time for this indicator.  There are some automated
+# checks that can be added to make sure this is still the case
+# in future years.
+
+# Change over time
+delta_o2 <- o2_lm$fitted.values[length(n_obs)] - o2_lm$fitted.value[1]
+```
+
+```{r}
+### Plot the time series
+# Create axes limits to make things simpler
+# These were determined through looking at quick rough plots and data limits
+o2_xlim <- c(min(ymd_hms(o2_ts$time)), max(ymd_hms(o2_ts$time)))
+o2_ylim <- c(1.5, 3.5) 
+
+# Access the NMFS color palette
+oceans <- nmfs_palette("oceans")(3)
+crustacean <- nmfs_palette("crustacean")(4)
+
+# Plot
+plot(ymd_hms(o2_ts$time), o2_ts$o2, type = "l", lwd = 2, col = oceans[2], 
+     xlim = o2_xlim, ylim = o2_ylim, xlab = " ", ylab = "DO (ml/l)",
+     xaxt = "n", yaxt = "n", xaxs = "i", yaxs = "i")
+par(new = TRUE)
+plot(ymd_hms(o2_ts$time), o2_lm$fitted.values, type = "l", lwd = 2, col = crustacean[1], 
+     xlim = o2_xlim, ylim = o2_ylim, xlab = " ", ylab = " ",
+     xaxt = "n", yaxt = "n", xaxs = "i", yaxs = "i")
+axis((1), at = ymd_hms(o2_ts$time[seq(1, length(n_obs), 12)]), tck = 0.025, labels = year(make_date(seq(1993, RptYr, 1))))
+axis((2), at = seq(1.5, 3.5, 0.25), tck = 0.025, las = 1)
+axis((3), at = ymd_hms(o2_ts$time[seq(1, length(n_obs), 12)]), tck = 0.025, labels = FALSE)
+axis((4), at = seq(1.5, 3.5, 0.25), tck = 0.025, labels = FALSE)
+# _axt = "n" removes tick labels so that they can be customized later 
+# _axs = "i" removes whitespace beyond axes maxima
+```
+
+
+```{r}
+# Read the file into R and make it to rasterstack
+stack_o2 = stack(fn)
+# Convert raster data to dataframe for calculating climatology
+df_temp = as.data.frame(rasterToPoints(stack_o2))
+df_temp$z = rowMeans(df_temp[,3:dim(df_temp)[2]], na.rm = T) /44.66
+# Convert dataframe to raster for mapping
+rst = rasterFromXYZ(df_temp[,c("x", "y", "z")])
+#create a rasterbrick with the rasterlayer
+o2_clim <- brick(rst)
+```
+
+```{r}
+### Mapping long-term climatology
+# Get land information and make it into a spatial object
+land <- maps::map('world', fill=TRUE, xlim=lon_range, ylim=lat_range, plot=FALSE)
+ids <- sapply(strsplit(land$names, ":"), function(x) x[1])
+bPols <- map2SpatialPolygons(land, IDs=ids, proj4string=CRS('+proj=longlat +datum=WGS84 +no_defs'))
+
+# Add EEZ
+llines.SpatVector <- function(x, ...) {
+  xy <- crds(x, list=TRUE)
+  names(xy) <- c("x", "y")
+  lattice::llines(xy, ...)
+}
+f <- "eez/eez.shp"
+v <- vect(f)
+lns <- as.lines(v)
+
+# make map themes
+mapTheme <- rasterTheme(region=cmocean('oxy')(50))
+
+# Make plot
+#regular scale
+
+levelplot(o2_clim , pretty=T, margin=F,  par.setting=mapTheme,  colorkey=list( height = .5, width = 1) ) + layer(sp.polygons(bPols)) + layer(llines(lns))
+
+# add unit to colorbar
+grid.text(expression(ml/l) , y=unit(0.6, "npc"), 
+                x=unit(0.81, "npc"))    
+```
+
+
+Dissolved oxygen (DO) is simulated by biogeochemical models using ocean and atmosphere reanalyses as forcings. It spans from 1993 to 2022 and is provided by Copernicus (https://data.marine.copernicus.eu/product/GLOBAL_MULTIYEAR_BGC_001_029/description). A highly significant (p<0.001) increasing trend is found in the DO of Palau subsurface waters (~400m) from 1993 to  `r RptYr`, and DO increased by `r signif(abs(delta_o2),2)` ml/l over this period.
+
